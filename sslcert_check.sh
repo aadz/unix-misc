@@ -1,6 +1,7 @@
 #!/bin/bash
 # by aadz, 2016
 # Check if SSL certificate exrired or will expire soon
+# and send notification by email
 
 # Configuration 
 CONNECT_TO="$1"	   # In HOST:PORT format
