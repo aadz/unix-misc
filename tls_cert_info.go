@@ -13,6 +13,7 @@ NotAfter:       2016-12-07 08:19:00 +0000 UTC
 It is 2016-09-22 21:15:09.927378879 +0300 MSK now: 75 days left
 
 */
+
 package main
 
 import (
@@ -23,7 +24,6 @@ import (
 	"os"
 	"time"
 )
-
 
 func main() {
 	// Parameters check
@@ -46,8 +46,7 @@ func main() {
 	crt := conn.ConnectionState().PeerCertificates[0]
 	fmt.Printf("*** Certificate info:\nVersion:\t%v\nHost:\t\t%v\nNotBefore:\t%v\nNotAfter:\t%v\n",
 		crt.Version, crt.DNSNames, crt.NotBefore, crt.NotAfter)
-	days_left := math.Ceil(crt.NotAfter.Sub(time.Now()).Seconds()/86400)-1
-	//fmt.Println("It is", time.Now(), "now:", days_left, "days left")
+	days_left := math.Ceil(crt.NotAfter.Sub(time.Now()).Seconds()/86400) - 1
 	fmt.Printf("*** Note:\nIt is %v now: %v days left\n", time.Now(), days_left)
 }
 
