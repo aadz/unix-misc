@@ -1,7 +1,7 @@
 # Miscellaneous UNIX admin scripts
 
 ## sslcert_enddate_check.sh
-Script checks if SSL certificate exrired or will expire soon and send notification by email
+Script checks if SSL certificate expired or will expire soon and send notification by email
 
 ## tls_cert_info.go
 TLS certificate information grabber. Example of run:
