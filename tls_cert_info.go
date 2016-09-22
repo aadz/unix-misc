@@ -11,9 +11,9 @@ NotBefore:      2016-09-14 08:25:39 +0000 UTC
 NotAfter:       2016-12-07 08:19:00 +0000 UTC
 *** Fingerprints:
 sha1:           d3:fa:53:d1:38:13:d2:14:b5:48:7d:d8:9f:c6:5b:ac:e0:c6:51:d3
-sha256:         e3:5e:14:c4:3d:49:20:d1:69:3f:a1:44:bb:f2:e4:d1:a:fa:59:c2:88:35:ff:de:d7:8:bc:b5:cc:22:35:b5
+sha256:         e3:5e:14:c4:3d:49:20:d1:69:3f:a1:44:bb:f2:e4:d1:0a:fa:59:c2:88:35:ff:de:d7:08:bc:b5:cc:22:35:b5
 *** Note:
-It is 2016-09-23 00:50:16.787572948 +0300 MSK now: 75 validity days left
+It is 2016-09-23 01:21:24.561347678 +0300 MSK now: 75 validity days left
 
 */
 
@@ -40,17 +40,15 @@ func main() {
 	// Connect to server
 	conn, err := tls.Dial("tcp", ssl_server, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
-		fmt.Printf("Canot connect to %v: %v", ssl_server, err)
+		fmt.Printf("Canot connect to %v: %v\n", ssl_server, err)
 		os.Exit(1)
 	}
 	defer conn.Close()
-	fmt.Println("Connected to", ssl_server)
+	fmt.Printf("Connected to %v\n", ssl_server)
 
 	// Show server's certificate info
 	crt := conn.ConnectionState().PeerCertificates[0]
 	days_left := math.Ceil(crt.NotAfter.Sub(time.Now()).Seconds()/86400) - 1
-
-	// Make fingerprints
 	sha1Fingerprint := sha1.Sum(crt.Raw)
 	sha256Fingerprint := sha256.Sum256(crt.Raw)
 
@@ -72,7 +70,7 @@ func show_help() {
 func byteSlice2Str(sl []byte) string {
 	strArr := make([]string, len(sl))
 	for i, b := range sl {
-		strArr[i] = fmt.Sprintf("%x", b)
+		strArr[i] = fmt.Sprintf("%0.2x", b)
 	}
 	return strings.Join(strArr, ":")
 }
