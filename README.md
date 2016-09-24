@@ -7,7 +7,7 @@ Script checks if SSL certificate expired or will expire soon and send notificati
 TLS certificate information grabber supporting IPv6 server addresses as well as UTF domain names.
 
 Example of run:
-```
+```text
 $ tls_cert_info example.com
 Connected to example.com:443
 *** Certificate info:
