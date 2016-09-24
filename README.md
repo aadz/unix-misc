@@ -4,7 +4,7 @@
 Script checks if SSL certificate expired or will expire soon and send notification by email
 
 ## tls_cert_info.go
-TLS certificate information grabber supporting IPv6 server adresses as well as UTF domain names.
+TLS certificate information grabber supporting IPv6 server addresses as well as UTF domain names.
 
 Example of run:
 ```
