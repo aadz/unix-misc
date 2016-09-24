@@ -1,9 +1,12 @@
 # Miscellaneous UNIX admin scripts
 
-## sslcert_enddate_check.sh
+* [sslcert_enddate_check.sh](#sslcert-enddate-check)
+* [tls_cert_info.go](#tls-cert-info)
+
+## sslcert_enddate_check.sh<a name="sslcert-enddate-check"></a>
 Script checks if SSL certificate expired or will expire soon and send notification by email
 
-## tls_cert_info.go
+## tls_cert_info.go<a name="tls-cert-info"></a>
 TLS certificate information grabber supporting IPv6 server addresses as well as UTF domain names.
 
 Example of run:
