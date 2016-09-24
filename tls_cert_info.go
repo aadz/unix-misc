@@ -91,7 +91,7 @@ func main() {
 		conn, err = tls.Dial("tcp", serverStr, &tlsCfg)
 	}
 	if err != nil {
-		fmt.Printf("Canot connect to %v: %v\n", serverStr, err)
+		fmt.Printf("Cannot connect to %v: %v\n", serverStr, err)
 		os.Exit(1)
 	}
 	defer conn.Close()
@@ -146,7 +146,7 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 	for _, c := range hStr {
 		if c > 127 {
 			var err error
-			hStr, err = idna.ToASCII(hStr)
+			hStr, err = idna.ToASCII(strings.ToLower(hStr))
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "Cannot convet %v to punycode\n")
 				os.Exit(1)
