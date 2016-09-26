@@ -113,7 +113,7 @@ func byteSlice2Str(sl []byte) string {
 }
 
 func commandLineGet() {
-	flag.BoolVar(&cfgValidityDaysOnly, "r", false, "Print remaining validity days count only.")
+	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only.")
 	flag.StringVar(&cfgHost, "H", "", "DNS host name or IP address.")
 	flag.UintVar(&cfgPort, "P", 443, "Port.")
 	flagVersion := flag.Bool("v", false, "Print version information and exit.")
