@@ -166,6 +166,19 @@ func showCrtInfo(crt *x509.Certificate) {
 		os.Exit(0)
 	}
 
+	// create certificate expiration info
+	expireStr := "day"
+	if days_left != 1 || days_left != -1 {
+		expireStr += "s"
+	}
+	if days_left < 0 {
+		expireStr += " have passed from the expiration date!"
+		days_left *= -1
+	} else {
+		expireStr += " left"
+	}
+	expireStr = fmt.Sprintf("%v %v", days_left, expireStr)
+
 	sha1Fingerprint := sha1.Sum(crt.Raw)
 	sha256Fingerprint := sha256.Sum256(crt.Raw)
 
@@ -173,14 +186,14 @@ func showCrtInfo(crt *x509.Certificate) {
 	infoStr += "SerialNum:\t%x\n"
 	infoStr += "PubKey:\t\t%v Encryption\n"
 	infoStr += "CrtSign:\t%v Encryption\n"
-	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v days left\n"
+	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v\n"
 	infoStr += "SubjectCN:\t%v\nDNSNames:\t%v\n"
 	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\n"
 	fmt.Printf(infoStr, crt.Issuer.CommonName, crt.Version,
 		crt.SerialNumber,
 		PKeyPKCS[crt.PublicKeyAlgorithm],
 		SignPKCS[crt.SignatureAlgorithm],
-		crt.NotBefore, crt.NotAfter, days_left,
+		crt.NotBefore, crt.NotAfter, expireStr,
 		crt.Subject.CommonName, crt.DNSNames,
 		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]))
 }
