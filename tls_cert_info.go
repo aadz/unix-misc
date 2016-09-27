@@ -148,7 +148,7 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 			var err error
 			hStr, err = idna.ToASCII(strings.ToLower(hStr))
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot convet %v to punycode\n")
+				fmt.Fprintf(os.Stderr, "Cannot convet %v to punycode: %v\n", hStr, err)
 				os.Exit(1)
 			}
 			break
