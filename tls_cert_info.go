@@ -166,16 +166,18 @@ func showCrtInfo(crt *x509.Certificate) {
 		os.Exit(0)
 	}
 
-	// create certificate expiration info
+	// create certificate expiration info string
 	expireStr := "day"
 	if days_left != 1 || days_left != -1 {
 		expireStr += "s"
 	}
-	if days_left < 0 {
+	if time.Now().After(crt.NotAfter) {
 		expireStr += " have passed from the expiration date!"
-		days_left *= -1
 	} else {
 		expireStr += " left"
+	}
+	if days_left < 0 {
+		days_left *= -1
 	}
 	expireStr = fmt.Sprintf("%v %v", days_left, expireStr)
 
