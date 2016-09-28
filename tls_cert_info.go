@@ -50,7 +50,7 @@ var (
 )
 
 func init() {
-	usageStr := "Usage:\t%v [-r] <HOST>[:<PORT>]\n\t%v [-r] -H <HOST> [-P <PORT>]\n\n"
+	usageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\n"
 	usageStr += "<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed\n"
 	usageStr += "by square brackets.\n\nCommand line parameters:\n"
 
