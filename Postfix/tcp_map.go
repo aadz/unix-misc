@@ -5,7 +5,7 @@
 	Function lookup() should get a key as a string
 	and return a correct reply to Postfix type of []byte.
 
-	by aadz, 2017, all rights looks as lefts
+	by aadz, 2017, all rights look as lefts
 */
 package main
 
