@@ -2,6 +2,9 @@
 	TPC map utility for Postfix. Test it like
 	# postmap -q - tcp:127.0.0.1:10044 < /tmp/alist
 
+	Function lookup() should get a key as a string
+	and return a correct reply to Postfix type of []byte.
+
 	by aadz, 2017, all rights looks as lefts
 */
 package main
@@ -39,6 +42,21 @@ func main() {
 	}
 }
 
+func lookup(key string) []byte {
+	// map a request as "out" string and
+	// (reminder of the requests' bytes sum divided by 16) + 1
+	var b = []byte(key)
+	var sum uint
+
+	for i := range b {
+		sum += uint(b[i])
+	}
+
+	// build result as a reply to the Postfix query
+	result := fmt.Sprintf("200 out%0.2d\n", sum%16+1)
+	return []byte(result)
+}
+
 func connHandler(conn *net.TCPConn) {
 	buf := make([]byte, 256)
 	var req string
@@ -68,21 +86,6 @@ theHandler:
 		req = "" // it is importatnt to set the request string empty here
 	}
 	conn.Close()
-}
-
-func lookup(key string) []byte {
-	// map a request as "out" string and
-	// (reminder of the requests' bytes sum divided by 16) + 1
-	var b = []byte(key)
-	var sum uint
-
-	for i := range b {
-		sum += uint(b[i])
-	}
-
-	// build result as a reply to the Postfix query
-	result := fmt.Sprintf("200 out%0.2d\n", sum%16+1)
-	return []byte(result)
 }
 
 func cmdLineGet() {
