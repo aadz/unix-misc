@@ -29,10 +29,10 @@ func lookup(key string) []byte {
 	// map a request as "out" string and
 	// (reminder of the requests' bytes sum divided by 16) + 1
 	var b = []byte(key)
-	var sum uint
+	var sum int
 
 	for i := range b {
-		sum += uint(b[i])
+		sum += int(b[i])
 	}
 
 	// build result as a reply to the Postfix query
