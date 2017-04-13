@@ -1,7 +1,7 @@
 /*
 TCP map - an utility for Postfix. See man tcp_table.
 
-Function lookup() is a subject of change as requiered, it should get a key as
+Function lookup() is a subject of change as required, it should get a key as
 a string and returns correctly formed reply to Postfix (type of []byte).
 Test it as:
 	postmap -q - tcp:127.0.0.1:10044 < keys_list
