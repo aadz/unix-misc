@@ -21,7 +21,7 @@ import (
 
 var (
 	cfgListenOn string
-	cfgDebug bool
+	cfgDebug    bool
 )
 
 func lookup(key string) []byte {
@@ -48,14 +48,10 @@ theHandler:
 		for !str.HasSuffix(req, "\n") {
 			cnt, err := conn.Read(buf)
 			if err != nil {
-				if err == io.EOF { // connection closed by client
-					if cfgDebug {
-						log.Printf("connection from %v closed", conn.RemoteAddr())
-					}
+				if cfgDebug && err == io.EOF { // connection closed by client
+					log.Printf("connection from %v closed", conn.RemoteAddr())
 				} else {
-					if cfgDebug {
-						log.Printf("cannot read the request: %v", err)
-					}
+					log.Printf("cannot read the request: %v", err)
 				}
 				break theHandler
 			}
@@ -101,9 +97,9 @@ func main() {
 	for {
 		clientConn, err := in.AcceptTCP()
 		if err == nil {
-		if cfgDebug {
-			log.Printf("clent connection from %v", clientConn.RemoteAddr())
-		}
+			if cfgDebug {
+				log.Printf("clent connection from %v", clientConn.RemoteAddr())
+			}
 			go connHandler(clientConn)
 		} else {
 			log.Printf("could not accept client connection: %v", err)
