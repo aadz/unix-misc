@@ -1,11 +1,12 @@
 /*
-	TPC map utility for Postfix. Test it as
-	# postmap -q - tcp:127.0.0.1:10044 < /tmp/alist
+TCP map - an utility for Postfix. See man tcp_table.
 
-	Function lookup() should get a key as a string
-	and return a correct reply to Postfix type of []byte.
+Function lookup() is a subject of change as requiered, it should get a key as
+a string and returns correctly formed reply to Postfix (type of []byte).
+Test it as:
+	postmap -q - tcp:127.0.0.1:10044 < keys_list
 
-	by aadz, 2017, all rights look as lefts
+by aadz, 2017, all rights look as lefts
 */
 package main
 
@@ -50,7 +51,7 @@ theHandler:
 			if err != nil {
 				if cfgDebug && err == io.EOF { // connection closed by client
 					log.Printf("connection from %v closed", conn.RemoteAddr())
-				} else {
+				} else if err != io.EOF {
 					log.Printf("cannot read the request: %v", err)
 				}
 				break theHandler
@@ -72,7 +73,7 @@ theHandler:
 		// all is done with the request, so we set it empty for a new one
 		req = ""
 	}
-	conn.Close()
+	conn.Close() // was open in main()
 }
 
 func cmdLineGet() {
@@ -84,7 +85,7 @@ func cmdLineGet() {
 
 func errExit(e error) {
 	if e != nil {
-		log.Printf("fatal: %s", e)
+		log.Printf("fatal: %v", e)
 		os.Exit(1)
 	}
 }
