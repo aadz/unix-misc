@@ -80,7 +80,6 @@ func cmdLineGet() {
 	flag.StringVar(&cfgListenOn, "l", "localhost:10044", "[address]:port to listen on")
 	flag.BoolVar(&cfgDebug, "d", false, "enable debug logging")
 	flag.Parse()
-	//log.Print("iIt will listen on ", cfgListenOn)
 }
 
 func errExit(e error) {
