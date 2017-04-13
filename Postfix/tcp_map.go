@@ -1,5 +1,5 @@
 /*
-	TPC map utility for Postfix. Test it like
+	TPC map utility for Postfix. Test it as
 	# postmap -q - tcp:127.0.0.1:10044 < /tmp/alist
 
 	Function lookup() should get a key as a string
@@ -20,27 +20,9 @@ import (
 )
 
 var (
-	listenOn string
+	cfgListenOn string
+	cfgDebug bool
 )
-
-func main() {
-	cmdLineGet()
-	lAddr, err := net.ResolveTCPAddr("tcp", listenOn)
-	errExit(err)
-	in, err := net.ListenTCP("tcp", lAddr)
-	errExit(err)
-	log.Printf("listening on %v, %v\n", lAddr, in)
-
-	for {
-		cliConn, err := in.AcceptTCP()
-		if err == nil {
-			log.Printf("clent connection from %v", cliConn.RemoteAddr())
-			go connHandler(cliConn)
-		} else {
-			log.Printf("could not accept client connection: %v", err)
-		}
-	}
-}
 
 func lookup(key string) []byte {
 	// map a request as "out" string and
@@ -67,9 +49,13 @@ theHandler:
 			cnt, err := conn.Read(buf)
 			if err != nil {
 				if err == io.EOF { // connection closed by client
-					log.Printf("connection from %v closed", conn.RemoteAddr())
+					if cfgDebug {
+						log.Printf("connection from %v closed", conn.RemoteAddr())
+					}
 				} else {
-					log.Printf("cannot read the request: %v", err)
+					if cfgDebug {
+						log.Printf("cannot read the request: %v", err)
+					}
 				}
 				break theHandler
 			}
@@ -81,7 +67,9 @@ theHandler:
 		if reqSlice[0] == "get" { // ignore "put" requests from Postfix
 			rep := lookup(reqSlice[1])
 			conn.Write(rep)
-			log.Printf("map %s to %s", reqSlice[1], rep)
+			if cfgDebug {
+				log.Printf("map %s to %s", reqSlice[1], rep)
+			}
 		}
 		req = "" // it is importatnt to set the request string empty here
 	}
@@ -89,14 +77,36 @@ theHandler:
 }
 
 func cmdLineGet() {
-	flag.StringVar(&listenOn, "l", "localhost:10044", "[address]:port to listen on")
+	flag.StringVar(&cfgListenOn, "l", "localhost:10044", "[address]:port to listen on")
+	flag.BoolVar(&cfgDebug, "d", false, "enable debug logging")
 	flag.Parse()
-	//log.Print("iIt will listen on ", listenOn)
+	//log.Print("iIt will listen on ", cfgListenOn)
 }
 
 func errExit(e error) {
 	if e != nil {
 		log.Printf("fatal: %s", e)
 		os.Exit(1)
+	}
+}
+
+func main() {
+	cmdLineGet()
+	lAddr, err := net.ResolveTCPAddr("tcp", cfgListenOn)
+	errExit(err)
+	in, err := net.ListenTCP("tcp", lAddr)
+	errExit(err)
+	log.Printf("listening on %v, %v\n", lAddr, in)
+
+	for {
+		clientConn, err := in.AcceptTCP()
+		if err == nil {
+		if cfgDebug {
+			log.Printf("clent connection from %v", clientConn.RemoteAddr())
+		}
+			go connHandler(clientConn)
+		} else {
+			log.Printf("could not accept client connection: %v", err)
+		}
 	}
 }
