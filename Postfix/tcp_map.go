@@ -60,14 +60,17 @@ theHandler:
 
 		// split the request to a string slice
 		reqSlice := str.Split(req[:len(req)-1], " ")
-		if reqSlice[0] == "get" { // ignore "put" requests from Postfix
+		if reqSlice[0] == "get" {
 			rep := lookup(reqSlice[1])
 			conn.Write(rep)
 			if cfgDebug {
 				log.Printf("map %s to %s", reqSlice[1], rep)
 			}
+		} else {
+			conn.Write([]byte("500 get-requests are only allowed here\n"))
 		}
-		req = "" // it is importatnt to set the request string empty here
+		// all is done with the request, so we set it empty for a new one
+		req = ""
 	}
 	conn.Close()
 }
