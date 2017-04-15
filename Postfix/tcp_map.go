@@ -45,13 +45,13 @@ func connHandler(conn *net.TCPConn) {
 
 theHandler:
 	for {
-		for len(req) == 0 || req[len(req)-1] != 0xA { //empty or not trailing "\n"
+		for len(req) == 0 || req[len(req)-1] != 0xA { // req is empty or not trailing "\n"
 			cnt, err := conn.Read(buf)
 			if err != nil {
-				if cfgDebug && err == io.EOF { // connection closed by client
-					log.Printf("connection from %v closed", conn.RemoteAddr())
-				} else if err != io.EOF {
+				if err != io.EOF {
 					log.Printf("cannot read the request: %v", err)
+				} else if cfgDebug {
+					log.Printf("connection from %v closed", conn.RemoteAddr())
 				}
 				break theHandler
 			}
@@ -59,7 +59,7 @@ theHandler:
 		}
 
 		if req[0:3] == "get" {
-			rep := lookup(req[4:len(req)-1])
+			rep := lookup(req[4 : len(req)-1])
 			conn.Write(rep)
 			if cfgDebug {
 				log.Printf("map %s to %s", req[4:len(req)-1], rep)
