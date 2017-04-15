@@ -17,7 +17,6 @@ import (
 	"log"
 	"net"
 	"os"
-	str "strings"
 )
 
 var (
@@ -46,7 +45,7 @@ func connHandler(conn *net.TCPConn) {
 
 theHandler:
 	for {
-		for !str.HasSuffix(req, "\n") {
+		for len(req) == 0 || req[len(req)-1] != 0xA { //empty or not trailing "\n"
 			cnt, err := conn.Read(buf)
 			if err != nil {
 				if cfgDebug && err == io.EOF { // connection closed by client
@@ -59,13 +58,11 @@ theHandler:
 			req += string(buf[0:cnt])
 		}
 
-		// split the request to a string slice
-		reqSlice := str.Split(req[:len(req)-1], " ")
-		if reqSlice[0] == "get" {
-			rep := lookup(reqSlice[1])
+		if req[0:3] == "get" {
+			rep := lookup(req[3:len(req)-1])
 			conn.Write(rep)
 			if cfgDebug {
-				log.Printf("map %s to %s", reqSlice[1], rep)
+				log.Printf("map %s to %s", req[3:len(req)-1], rep)
 			}
 		} else {
 			conn.Write([]byte("500 get-requests are only allowed here\n"))
@@ -95,7 +92,7 @@ func main() {
 	errExit(err)
 	in, err := net.ListenTCP("tcp", lAddr)
 	errExit(err)
-	log.Printf("listening on %v, %v\n", lAddr, in)
+	log.Println("listening on ", lAddr)
 
 	for {
 		clientConn, err := in.AcceptTCP()
