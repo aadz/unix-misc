@@ -59,10 +59,10 @@ theHandler:
 		}
 
 		if req[0:3] == "get" {
-			rep := lookup(req[3:len(req)-1])
+			rep := lookup(req[4:len(req)-1])
 			conn.Write(rep)
 			if cfgDebug {
-				log.Printf("map %s to %s", req[3:len(req)-1], rep)
+				log.Printf("map %s to %s", req[4:len(req)-1], rep)
 			}
 		} else {
 			conn.Write([]byte("500 get-requests are only allowed here\n"))
