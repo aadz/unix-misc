@@ -50,7 +50,7 @@ theHandler:
 			if err != nil {
 				if err != io.EOF {
 					log.Printf("cannot read the request: %v", err)
-				} else if cfgDebug { // end of file'd got
+				} else if cfgDebug { // end of file
 					log.Printf("connection from %v closed", conn.RemoteAddr())
 				}
 				break theHandler
