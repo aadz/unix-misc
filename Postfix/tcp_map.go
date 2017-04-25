@@ -41,10 +41,10 @@ func lookup(key string) []byte {
 
 func connHandler(conn *net.TCPConn) {
 	buf := make([]byte, 256)
-	var req string
 
 theHandler:
 	for {
+		req := "" // new request string
 		for len(req) == 0 || req[len(req)-1] != 0xA { // req is empty or not trailing "\n"
 			cnt, err := conn.Read(buf)
 			if err != nil {
@@ -67,8 +67,6 @@ theHandler:
 		} else {
 			conn.Write([]byte("500 get-requests are only allowed here\n"))
 		}
-		// all is done with the request, so we set it empty for a new one
-		req = ""
 	}
 	conn.Close() // was open in main()
 }
