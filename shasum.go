@@ -1,5 +1,5 @@
 /*
-	Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest
+  Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest
 */
 package main
 
@@ -35,7 +35,6 @@ func init() {
 func main() {
 	// command line flags processing
 	flag.Parse()
-
 	// choose a digest size
 	var h hash.Hash
 	if flag512 {
@@ -58,7 +57,7 @@ func main() {
 	// compute and print out
 	_, err := io.Copy(h, os.Stdin)
 	if err != nil {
-		fmt.Println("Error: ", err)
+		fmt.Println("Error:", err)
 		os.Exit(1)
 	}
 	fmt.Println(byteSlice2Str(h.Sum(nil), delimiter))
@@ -66,16 +65,16 @@ func main() {
 
 // convert a slice of bytes to a delimited hexs string
 func byteSlice2Str(sl []byte, delimiter string) string {
-	var format string
-	strArr := make([]string, len(sl))
-
+	format := "%0.2x"
 	if flagUpper {
 		format = "%0.2X"
-	} else {
-		format = "%0.2x"
 	}
+
+	// convert bytes to sring representation
+	strArr := make([]string, len(sl))
 	for i, b := range sl {
 		strArr[i] = fmt.Sprintf(format, b)
 	}
+
 	return strings.Join(strArr, delimiter)
 }
