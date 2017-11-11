@@ -50,7 +50,7 @@ func main() {
 	} else {
 		h = sha1.New()
 	}
-	if flagColon { // delimiter is empty string by default
+	if flagColon { // delimiter (empty by default)
 		delimiter = ":"
 	} else if flagSpace {
 		delimiter = " "
