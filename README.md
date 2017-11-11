@@ -1,10 +1,27 @@
 # Miscellaneous UNIX admin scripts
 
+* [shasum.go](#shasum)
 * [sslcert_enddate_check.sh](#sslcert-enddate-check)
 * [tls_cert_info.go](#tls-cert-info)
 
+## shasum.go<a name="shasum"></a>
+Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest.
+
+```text
+Usage of shasum:
+  -1    SHA1 (default true)
+  -256
+        SHA256
+  -384
+        SHA384
+  -512
+        SHA512
+  -X    print hex nums in upper case
+  -c    as a colon delimited string
+  -s    as a space delimited string```
+                                      
 ## sslcert_enddate_check.sh<a name="sslcert-enddate-check"></a>
-Script checks if SSL certificate expired or will expire soon and send notification by email
+Script checks if SSL certificate expired or will expire soon and send notification by email.
 
 ## tls_cert_info.go<a name="tls-cert-info"></a>
 TLS certificate information grabber supporting IPv6 server addresses as well as UTF domain names.
