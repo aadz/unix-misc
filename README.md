@@ -18,7 +18,8 @@ Usage of shasum:
         SHA512
   -X    print hex nums in upper case
   -c    as a colon delimited string
-  -s    as a space delimited string```
+  -s    as a space delimited string
+  ```
                                       
 ## sslcert_enddate_check.sh<a name="sslcert-enddate-check"></a>
 Script checks if SSL certificate expired or will expire soon and send notification by email.
