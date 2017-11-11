@@ -50,12 +50,10 @@ func main() {
 	} else {
 		h = sha1.New()
 	}
-	if flagColon { // delimmiter
+	if flagColon { // delimiter is empty string by default
 		delimiter = ":"
 	} else if flagSpace {
 		delimiter = " "
-	} else {
-		delimiter = ""
 	}
 
 	// create and print checksumm
