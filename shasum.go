@@ -1,4 +1,4 @@
-/* 
+/*
 	Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest
 */
 package main
@@ -33,15 +33,12 @@ func init() {
 }
 
 func main() {
-	var (
-		sumStr    string
-		delimiter string
-		h         hash.Hash
-	)
-
 	// command line flags processing
 	flag.Parse()
-	if flag512 { // size
+
+	// choose a digest size
+	var h hash.Hash
+	if flag512 {
 		h = sha512.New()
 	} else if flag384 {
 		h = sha512.New384()
@@ -50,22 +47,21 @@ func main() {
 	} else {
 		h = sha1.New()
 	}
-	if flagColon { // delimiter (empty by default)
+	// choose a delimiter
+	var delimiter string
+	if flagColon {
 		delimiter = ":"
 	} else if flagSpace {
 		delimiter = " "
 	}
 
-	// create and print checksumm
-	//written, err := io.Copy(h, os.Stdin)
+	// compute and print out
 	_, err := io.Copy(h, os.Stdin)
 	if err != nil {
 		fmt.Println("Error: ", err)
 		os.Exit(1)
 	}
-	// fmt.Println("***", written, "bytes written.")
-	sumStr = byteSlice2Str(h.Sum(nil), delimiter)
-	fmt.Println(sumStr)
+	fmt.Println(byteSlice2Str(h.Sum(nil), delimiter))
 }
 
 // convert a slice of bytes to a delimited hexs string
