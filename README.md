@@ -26,8 +26,8 @@ Script checks if SSL certificate expired or will expire soon and send notificati
 
 ## tls_cert_info.go<a name="tls-cert-info"></a>
 TLS certificate information grabber supporting IPv6 server addresses as well as UTF domain names.
-If you need a local PEM encoded certificates file same info use -f command line option. And -h for
-help usual.
+If you need a local PEM encoded certificates file same info use `-f` command line option. And `-h` for
+help us sual.
 
 Example of run:
 ```text
