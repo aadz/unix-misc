@@ -174,7 +174,7 @@ func showCrtInfo(crt *x509.Certificate) {
 }
 
 func showPemFile() {
-	// read PEM ertificates from a file
+	// read PEM certificates from a file
 	crtPEM, err := ioutil.ReadFile(cfgFile)
 	if err != nil {
 		fmt.Println(err)
