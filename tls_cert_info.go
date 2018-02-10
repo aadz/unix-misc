@@ -1,8 +1,3 @@
-// TLS certificate information grabber.
-// Usage:
-//     tls_cert_info <HOST>:<PORT>
-// by aadz, 2016
-
 package main
 
 import (
@@ -10,8 +5,10 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/pem"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"runtime"
 	"strconv"
@@ -23,10 +20,11 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.8"
+	VERSION   = "0.9.0"
 )
 
 var (
+	cfgFile             string
 	cfgValidityDaysOnly bool
 	cfgHost             string
 	cfgPort             uint
@@ -50,12 +48,12 @@ var (
 )
 
 func init() {
-	usageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\n"
+	usageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\t%v -f <filename>\n\n"
 	usageStr += "<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed\n"
 	usageStr += "by square brackets.\n\nCommand line parameters:\n"
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, usageStr, PROG_NAME, PROG_NAME)
+		fmt.Fprintf(os.Stderr, usageStr, PROG_NAME, PROG_NAME, PROG_NAME)
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "  -h\tShow this help page.\n")
 	}
@@ -69,37 +67,11 @@ func main() {
 		os.Exit(0)
 	}
 
-	// Host and port converting to a server string
-	if len(cfgHost) == 0 { // <HOST>:<PORT> form used
-		hostStr, portStr = normalizeHostStr(os.Args[len(os.Args)-1])
-	} else { // -H <HOST> -P <PORT> form used
-		hostStr, portStr = normalizeHostStr(cfgHost + ":" + portStr)
+	if len(cfgFile) > 0 {
+		showPemFile()
+	} else {
+		showSiteCert()
 	}
-
-	if len(portStr) == 0 { // port was not specified
-		// "flag" already checked cfgPort for type of uint
-		portStr = strconv.Itoa(int(cfgPort))
-	}
-
-	// Connect to server
-	serverStr := hostStr + ":" + portStr
-	tlsCfg := tls.Config{InsecureSkipVerify: true}
-	conn, err := tls.Dial("tcp", serverStr, &tlsCfg)
-	if err != nil && strings.Contains(err.Error(), "too many colons in address") {
-		// try to add [] and set default port
-		serverStr = "[" + os.Args[len(os.Args)-1] + "]:443"
-		conn, err = tls.Dial("tcp", serverStr, &tlsCfg)
-	}
-	if err != nil {
-		fmt.Printf("Cannot connect to %v: %v\n", serverStr, err)
-		os.Exit(1)
-	}
-	defer conn.Close()
-
-	if !cfgValidityDaysOnly {
-		fmt.Printf("Connected to %v\n", serverStr)
-	}
-	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
 }
 
 // byteSlice2Str converts a slice of bytes to a colon delimited hexs string
@@ -114,6 +86,7 @@ func byteSlice2Str(sl []byte) string {
 
 func commandLineGet() {
 	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only.")
+	flag.StringVar(&cfgFile, "f", "", "File containing PEM encoded certificates.")
 	flag.StringVar(&cfgHost, "H", "", "DNS host name or IP address.")
 	flag.UintVar(&cfgPort, "P", 443, "Port.")
 	flagVersion := flag.Bool("v", false, "Print version information and exit.")
@@ -161,7 +134,7 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 func showCrtInfo(crt *x509.Certificate) {
 	days_left := int(crt.NotAfter.Sub(time.Now()).Seconds() / 86400)
 
-	if cfgValidityDaysOnly {
+	if cfgValidityDaysOnly && len(cfgFile) == 0 {
 		fmt.Println(days_left)
 		os.Exit(0)
 	}
@@ -198,4 +171,69 @@ func showCrtInfo(crt *x509.Certificate) {
 		crt.NotBefore, crt.NotAfter, expireStr,
 		crt.Subject.CommonName, crt.DNSNames,
 		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]))
+}
+
+func showPemFile() {
+	// read PEM ertificates from a file
+	crtPEM, err := ioutil.ReadFile(cfgFile)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// decode PEM file
+	var crtArr []*(pem.Block)
+	rest := crtPEM
+	for len(rest) > 0 {
+		block, r := pem.Decode(rest)
+		rest = r
+		if block != nil && block.Type == "CERTIFICATE" {
+			crtArr = append(crtArr, block)
+		}
+	}
+
+	for i, _ := range crtArr {
+		cert, err := x509.ParseCertificate(crtArr[i].Bytes)
+		if err != nil {
+			panic("failed to parse certificate: " + err.Error())
+		}
+		showCrtInfo(cert)
+		if i+1 < len(crtArr) {
+			fmt.Println("--")
+		}
+	}
+}
+
+func showSiteCert() {
+	// Host and port converting to a server string
+	if len(cfgHost) == 0 { // <HOST>:<PORT> form used
+		hostStr, portStr = normalizeHostStr(os.Args[len(os.Args)-1])
+	} else { // -H <HOST> -P <PORT> form used
+		hostStr, portStr = normalizeHostStr(cfgHost + ":" + portStr)
+	}
+
+	if len(portStr) == 0 { // port was not specified
+		// "flag" already checked cfgPort for type of uint
+		portStr = strconv.Itoa(int(cfgPort))
+	}
+
+	// Connect to server
+	serverStr := hostStr + ":" + portStr
+	tlsCfg := tls.Config{InsecureSkipVerify: true}
+	conn, err := tls.Dial("tcp", serverStr, &tlsCfg)
+	if err != nil && strings.Contains(err.Error(), "too many colons in address") {
+		// try to add '[]' for IPv6 and set default port
+		serverStr = "[" + os.Args[len(os.Args)-1] + "]:443"
+		conn, err = tls.Dial("tcp", serverStr, &tlsCfg)
+	}
+	if err != nil {
+		fmt.Printf("Cannot connect to %v: %v\n", serverStr, err)
+		os.Exit(1)
+	}
+	defer conn.Close()
+
+	if !cfgValidityDaysOnly {
+		fmt.Printf("Connected to %v\n", serverStr)
+	}
+	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
 }
