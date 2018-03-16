@@ -8,14 +8,17 @@
 Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest.
 
 ```text
-Usage:  tls_cert_info [-d] <HOST>[:<PORT>]                                                                       
-        tls_cert_info [-d] -H <HOST> [-P <PORT>]                                                                 
-        tls_cert_info -f <filename>                                                                             <HOST> might be a DNS name or an IP address. IPv6 address should be enclosed                                     by square brackets.                                                                                             
-
-Command line parameters:                                                                                           -H string                                                                                                             DNS host name or IP address.                                                                               -P uint                                                                                                               Port. (default 443)                                                                                       -d    Print remaining validity days count only.                                                                 -f string
-        File containing PEM encoded certificates.
-  -v    Print version information and exit.
-  -h    Show this help page.
+Usage of shasum:
+  -1    SHA1 (default true)
+  -256
+        SHA256
+  -384
+        SHA384
+  -512
+        SHA512
+  -X    print hex nums in upper case
+  -c    as a colon delimited string
+  -s    as a space delimited string
 ```
                                       
 ## sslcert_enddate_check.sh<a name="sslcert-enddate-check"></a>
