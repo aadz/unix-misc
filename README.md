@@ -10,8 +10,8 @@ Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest.
 ```text
 Usage:  tls_cert_info [-d] <HOST>[:<PORT>]                                                                       
         tls_cert_info [-d] -H <HOST> [-P <PORT>]                                                                 
-        tls_cert_info -f <filename>                                                                                                                                                                           
-<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed                                     by square brackets.                                                                                                                                                                                          
+        tls_cert_info -f <filename>                                                                             <HOST> might be a DNS name or an IP address. IPv6 address should be enclosed                                     by square brackets.                                                                                             
+
 Command line parameters:                                                                                           -H string                                                                                                             DNS host name or IP address.                                                                               -P uint                                                                                                               Port. (default 443)                                                                                       -d    Print remaining validity days count only.                                                                 -f string
         File containing PEM encoded certificates.
   -v    Print version information and exit.
