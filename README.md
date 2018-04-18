@@ -1,4 +1,4 @@
-# Miscellaneous UNIX admin script
+# Miscellaneous UNIX admin scripts
 
 * [go-socks.go](#go-socks.go)
 * [shasum.go](#shasum)
