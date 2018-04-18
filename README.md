@@ -1,8 +1,12 @@
-# Miscellaneous UNIX admin scripts
+# Miscellaneous UNIX admin script
 
+* [go-socks.go](#go-socks.go)
 * [shasum.go](#shasum)
 * [sslcert_enddate_check.sh](#sslcert-enddate-check)
 * [tls_cert_info.go](#tls-cert-info)
+
+## go-socks.go
+A simple SOCKS5 server.Unfortunately, all usage info in comments and coe for now.
 
 ## shasum.go<a name="shasum"></a>
 Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest.
