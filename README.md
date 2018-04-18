@@ -9,7 +9,7 @@
 A simple SOCKS5 server. Unfortunately, all usage info presented in comments and code for now.
 
 ## shasum.go<a name="shasum"></a>
-Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest.
+Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest of it.
 
 ```text
 Usage of shasum:
