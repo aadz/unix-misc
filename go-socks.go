@@ -18,29 +18,43 @@ import (
 )
 
 const (
-	listenOn = "0.0.0.0:27002"
+	listenOn = "0.0.0.0:25002"
 )
 
 var (
 	authFile  string
+	logFile   string
+	logger    *log.Logger
 	credStore socks5.StaticCredentials
 )
 
 func init() {
 	// auth file in form user:password, one pair per a line , comments by "#"
 	flag.StringVar(&authFile, "a", "/etc/go-socks/auth", "specify users' auth file")
+	flag.StringVar(&logFile, "l", "/var/log/go-socks.log", "specify log file, \"-\" for STDERR")
 	flag.Parse()
+
+	// open log
+	var err error
+	logF := os.Stderr
+	if logFile != "-" {
+		logF, err = os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Cannot open log file %s: %s\n", logFile, err)
+			logF = os.Stderr // just use STDERR
+		}
+	}
+	logger = log.New(logF, "go-socks5 ", log.LstdFlags)
 }
 
 func main() {
 	if err := readAuthFile(); err != nil {
-		fmt.Printf("auth file read error: %v", err)
+		logger.Fatalf("Auth file read error: %s\n", err)
 		os.Exit(1)
 	}
 
 	// Create a SOCKS5 server
 	conf := &socks5.Config{}
-	logger := log.New(os.Stdout, "go-socks5 ", log.LstdFlags)
 	conf.Logger = logger
 	conf.Credentials = credStore
 
@@ -48,8 +62,6 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	//fmt.Printf("AuthMethods: %v\nCredentials: %v\nResolver: %v\nRules: %v\nRewriter: %v\nBindIP: %v\nLogger: %v\n",
-	//conf.AuthMethods, conf.Credentials, conf.Resolver, conf.Rules, conf.Rewriter, conf.Logger)
 
 	l, err := net.Listen("tcp", listenOn)
 	if err != nil {
