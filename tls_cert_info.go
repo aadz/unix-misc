@@ -5,6 +5,7 @@ import (
 	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/pem"
 	"flag"
 	"fmt"
@@ -156,6 +157,8 @@ func showCrtInfo(crt *x509.Certificate) {
 
 	sha1Fingerprint := sha1.Sum(crt.Raw)
 	sha256Fingerprint := sha256.Sum256(crt.Raw)
+	sha256TbsFingerprint := sha256.Sum256(crt.RawSubjectPublicKeyInfo)
+	spki := base64.StdEncoding.EncodeToString(sha256TbsFingerprint[:])
 
 	infoStr := "*** Certificate info:\nIssuerCN:\t%v\nVersion:\t%v\n"
 	infoStr += "SerialNum:\t%x\n"
@@ -163,14 +166,14 @@ func showCrtInfo(crt *x509.Certificate) {
 	infoStr += "CrtSign:\t%v Encryption\n"
 	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v\n"
 	infoStr += "SubjectCN:\t%v\nDNSNames:\t%v\n"
-	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\n"
+	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\nSPKI:\t\t%v\n"
 	fmt.Printf(infoStr, crt.Issuer.CommonName, crt.Version,
 		crt.SerialNumber,
 		PKeyPKCS[crt.PublicKeyAlgorithm],
 		SignPKCS[crt.SignatureAlgorithm],
 		crt.NotBefore, crt.NotAfter, expireStr,
 		crt.Subject.CommonName, crt.DNSNames,
-		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]))
+		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
 }
 
 func showPemFile() {
