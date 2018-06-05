@@ -6,7 +6,7 @@
 * [tls_cert_info.go](#tls-cert-info)
 
 ## go-socks
-A simple SOCKS5 server. Unfortunately, all usage info presented in comments and code for now.
+A simple SOCKS5 server written in Go.
 
 ## shasum.go<a name="shasum"></a>
 Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest of it.
