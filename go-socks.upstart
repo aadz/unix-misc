@@ -1,0 +1,21 @@
+# go-socks  - SOCKS5 server
+
+description     "SOCKS5 server"
+
+start on runlevel [2345]
+stop on runlevel [2345]
+
+respawn
+respawn limit 10 5
+umask 022
+
+console none
+
+pre-start script
+    test -x /usr/local/sbin/go-socks || { stop; exit 0; }
+
+    touch /var/log/go-socks.log
+    chown go-socks /var/log/go-socks.log
+end script
+
+exec /sbin/start-stop-daemon --start --chuid go-socks --exec /usr/local/sbin/go-socks
