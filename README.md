@@ -1,11 +1,11 @@
 # Miscellaneous UNIX admin scripts
 
-* [go-socks.go](#go-socks.go)
+* [go-socks](#go-socks)
 * [shasum.go](#shasum)
 * [sslcert_enddate_check.sh](#sslcert-enddate-check)
 * [tls_cert_info.go](#tls-cert-info)
 
-## go-socks.go
+## go-socks
 A simple SOCKS5 server. Unfortunately, all usage info presented in comments and code for now.
 
 ## shasum.go<a name="shasum"></a>
