@@ -21,7 +21,7 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.0"
+	VERSION   = "0.9.1"
 )
 
 var (
@@ -165,14 +165,15 @@ func showCrtInfo(crt *x509.Certificate) {
 	infoStr += "PubKey:\t\t%v Encryption\n"
 	infoStr += "CrtSign:\t%v Encryption\n"
 	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v\n"
-	infoStr += "SubjectCN:\t%v\nDNSNames:\t%v\n"
+	infoStr += "Subject:\t%v\nDNSNames:\t%v\n"
 	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\nSPKI:\t\t%v\n"
 	fmt.Printf(infoStr, crt.Issuer.CommonName, crt.Version,
 		crt.SerialNumber,
 		PKeyPKCS[crt.PublicKeyAlgorithm],
 		SignPKCS[crt.SignatureAlgorithm],
 		crt.NotBefore, crt.NotAfter, expireStr,
-		crt.Subject.CommonName, crt.DNSNames,
+		//crt.Subject.CommonName, crt.DNSNames,
+		crt.Subject.String(), crt.DNSNames,
 		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
 }
 

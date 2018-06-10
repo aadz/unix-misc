@@ -44,8 +44,8 @@ SerialNum:      e64c5fbc236ade14b172aeb41c78cb0
 PubKey:         RSA Encryption
 CrtSign:        SHA256 With RSA Encryption
 NotBefore:      2015-11-03 00:00:00 +0000 UTC
-NotAfter:       2018-11-28 12:00:00 +0000 UTC - 176 days left
-SubjectCN:      www.example.org
+NotAfter:       2018-11-28 12:00:00 +0000 UTC - 171 days left
+Subject:        CN=www.example.org,OU=Technology,O=Internet Corporation for Assigned Names and Numbers,L=Los Angeles,ST=California,C=US
 DNSNames:       [www.example.org example.com example.edu example.net example.org www.example.com www.example.edu www.example.net]
 *** Fingerprints:
 sha1:           25:09:fb:22:f7:67:1a:ea:2d:0a:28:ae:80:51:6f:39:0d:e0:ca:21
