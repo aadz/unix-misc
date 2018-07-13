@@ -1,7 +1,4 @@
-/*
-	$Id: go-socks.go,v 1.3 2018/04/14 07:19:05 aadz Exp aadz $
-	by aadz, 2018
-*/
+/* By aadz, 2018 */
 
 package main
 
@@ -18,14 +15,18 @@ import (
 )
 
 const (
-	listenOn = "0.0.0.0:1080"
+	LISTEN_ON        = "0.0.0.0:25002"
+	PASSWORD_MIN_LEN = 8
 )
 
 var (
-	authFile  string
-	logFile   string
-	logger    *log.Logger
+	// command line perameters
+	authFile string
+	logFile  string
+
+	// global vars
 	credStore socks5.StaticCredentials
+	logger    *log.Logger
 )
 
 func init() {
@@ -57,19 +58,19 @@ func main() {
 	conf := &socks5.Config{}
 	conf.Logger = logger
 	conf.Credentials = credStore
-
 	server, err := socks5.New(conf)
 	if err != nil {
 		panic(err)
 	}
 
-	l, err := net.Listen("tcp", listenOn)
+	l, err := net.Listen("tcp", LISTEN_ON)
 	if err != nil {
 		logger.Fatal(err)
 	}
 	defer l.Close()
 	logger.Print("Service started")
 
+	// wait for connections
 	for {
 		conn, err := l.Accept()
 		if err != nil {
@@ -93,9 +94,12 @@ func readAuthFile() error {
 		if len(l) == 0 || l[0] == '#' { // skip comments
 			continue
 		}
-		up := strings.SplitN(l, ":", 2) // split user:password line
-		if len(up) == 2 && len(up[0]) > 0 && len(up[1]) > 0 {
+		up := strings.SplitN(l, ":", 2) // split user:password on the line
+		if len(up) == 2 && len(up[0]) > 0 && len(up[1]) >= PASSWORD_MIN_LEN {
 			authMap[up[0]] = up[1]
+		} else if len(up[1]) < PASSWORD_MIN_LEN {
+			logger.Printf("Incorrect password for %s, it must be %d symbols at least",
+				up[0], PASSWORD_MIN_LEN)
 		}
 	}
 	if len(authMap) == 0 {
