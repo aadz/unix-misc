@@ -25,7 +25,7 @@ const (
 )
 
 var (
-	cfgFile             string
+	cfgPemFile          string
 	cfgValidityDaysOnly bool
 	cfgHost             string
 	cfgPort             uint
@@ -68,7 +68,7 @@ func main() {
 		os.Exit(0)
 	}
 
-	if len(cfgFile) > 0 {
+	if len(cfgPemFile) > 0 {
 		showPemFile()
 	} else {
 		showSiteCert()
@@ -87,7 +87,7 @@ func byteSlice2Str(sl []byte) string {
 
 func commandLineGet() {
 	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only.")
-	flag.StringVar(&cfgFile, "f", "", "File containing PEM encoded certificates.")
+	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates.")
 	flag.StringVar(&cfgHost, "H", "", "DNS host name or IP address.")
 	flag.UintVar(&cfgPort, "P", 443, "Port.")
 	flagVersion := flag.Bool("v", false, "Print version information and exit.")
@@ -135,7 +135,7 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 func showCrtInfo(crt *x509.Certificate) {
 	days_left := int(crt.NotAfter.Sub(time.Now()).Seconds() / 86400)
 
-	if cfgValidityDaysOnly && len(cfgFile) == 0 {
+	if cfgValidityDaysOnly && len(cfgPemFile) == 0 {
 		fmt.Println(days_left)
 		os.Exit(0)
 	}
@@ -179,7 +179,7 @@ func showCrtInfo(crt *x509.Certificate) {
 
 func showPemFile() {
 	// read PEM certificates from a file
-	crtPEM, err := ioutil.ReadFile(cfgFile)
+	crtPEM, err := ioutil.ReadFile(cfgPemFile)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
