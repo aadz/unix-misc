@@ -122,7 +122,7 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 			var err error
 			hStr, err = idna.ToASCII(strings.ToLower(hStr))
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Cannot convet %v to punycode: %v\n", hStr, err)
+				fmt.Fprintf(os.Stderr, "Cannot convet %s to punycode: %s\n", hStr, err)
 				os.Exit(1)
 			}
 			break
@@ -172,7 +172,6 @@ func showCrtInfo(crt *x509.Certificate) {
 		PKeyPKCS[crt.PublicKeyAlgorithm],
 		SignPKCS[crt.SignatureAlgorithm],
 		crt.NotBefore, crt.NotAfter, expireStr,
-		//crt.Subject.CommonName, crt.DNSNames,
 		crt.Subject.String(), crt.DNSNames,
 		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
 }
@@ -181,11 +180,11 @@ func showPemFile() {
 	// read PEM certificates from a file
 	crtPEM, err := ioutil.ReadFile(cfgPemFile)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintf(os.Stderr, "%s\n", err.Error())
 		os.Exit(1)
 	}
 
-	// decode PEM file
+	// decode PEM data
 	var crtArr []*(pem.Block)
 	rest := crtPEM
 	for len(rest) > 0 {
@@ -199,7 +198,7 @@ func showPemFile() {
 	for i, _ := range crtArr {
 		cert, err := x509.ParseCertificate(crtArr[i].Bytes)
 		if err != nil {
-			panic("failed to parse certificate: " + err.Error())
+			fmt.Fprintf(os.Stderr, "failed to parse certificate: s%\n", err.Error())
 		}
 		showCrtInfo(cert)
 		if i+1 < len(crtArr) {
@@ -231,13 +230,13 @@ func showSiteCert() {
 		conn, err = tls.Dial("tcp", serverStr, &tlsCfg)
 	}
 	if err != nil {
-		fmt.Printf("Cannot connect to %v: %v\n", serverStr, err)
+		fmt.Fprintf(os.Stderr, "Cannot connect to %s: %s\n", serverStr, err)
 		os.Exit(1)
 	}
 	defer conn.Close()
 
 	if !cfgValidityDaysOnly {
-		fmt.Printf("Connected to %v\n", serverStr)
+		fmt.Fprintf(os.Stderr, "Connected to %s\n", serverStr)
 	}
 	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
 }
