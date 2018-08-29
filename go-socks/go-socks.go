@@ -104,7 +104,7 @@ func startServer(srv *socks5.Server, listenOn string) {
 	for {
 		conn, err := l.Accept()
 		if err != nil {
-			logger.Print(err)
+			logger.Printf("[WARN] %s", err)
 		}
 		logger.Printf("[INFO] connect from %v", conn.RemoteAddr())
 		go srv.ServeConn(conn)
