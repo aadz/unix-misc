@@ -1,4 +1,6 @@
-/* By aadz, 2018 */
+/* Simple SOCKS5 server
+   By aadz, 2018
+*/
 
 package main
 
@@ -22,41 +24,34 @@ const (
 	PASSWORD_MIN_LEN = 8
 )
 
-var (
-	// command line perameters
-	authFile string
-	logFile  string
-
-	// global vars
-	credStore socks5.StaticCredentials
-	logger    *log.Logger
+var ( // global vars
+	logger *log.Logger
 )
 
-func init() {
+func main() {
+	// Get command line params
+	var authFile, logFile string
 	flag.StringVar(&authFile, "a", AUTH_FILE, "specify users' auth file")
 	flag.StringVar(&logFile, "l", LOG_FILE, "specify log file, \"-\" for STDERR")
 	flag.Parse()
 
-	// open log
+	// Open log
 	var err error
-	logF := os.Stderr
+	logDest := os.Stderr
 	if logFile != "-" {
-		logF, err = os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
+		logDest, err = os.OpenFile(logFile, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0640)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Cannot open log file %s: %s\n", logFile, err)
-			logF = os.Stderr // just use STDERR
+			logDest = os.Stderr // just use STDERR
 		}
 	}
-	logger = log.New(logF, "go-socks ", log.LstdFlags)
-}
-
-func main() {
-	if err := readAuthFile(); err != nil {
-		logger.Fatalf("Auth file read error: %s\n", err)
-		os.Exit(1)
-	}
+	logger = log.New(logDest, "go-socks ", log.LstdFlags)
 
 	// Create a SOCKS5 server
+	var credStore socks5.CredentialStore
+	if credStore, err = readAuthFile(authFile); err != nil {
+		logger.Fatalf("Auth file read error: %s\n", err)
+	}
 	conf := &socks5.Config{}
 	conf.Logger = logger
 	conf.Credentials = credStore
@@ -65,29 +60,14 @@ func main() {
 		panic(err)
 	}
 
-	l, err := net.Listen("tcp", LISTEN_ON)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	defer l.Close()
-	logger.Print("Service started")
-
-	// wait for connections
-	for {
-		conn, err := l.Accept()
-		if err != nil {
-			logger.Print(err)
-		}
-		logger.Printf("connect from %v", conn.RemoteAddr())
-		go server.ServeConn(conn)
-	}
+	startServer(server)
 }
 
 // Read auth file in form user:password, one pair per a line , comments by "#"
-func readAuthFile() error {
+func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 	fStr, err := ioutil.ReadFile(authFile)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	authList := strings.Split(string(fStr), "\n")
 
@@ -106,9 +86,26 @@ func readAuthFile() error {
 		}
 	}
 	if len(authMap) == 0 {
-		return fmt.Errorf("No user auth lines found in %s", authFile)
+		return nil, fmt.Errorf("No user auth lines found in %s", authFile)
 	}
-	//fmt.Printf("Auth map: %v\n", authMap)
-	credStore = authMap
-	return nil
+	return authMap, nil
+}
+
+func startServer(srv *socks5.Server) {
+	l, err := net.Listen("tcp", LISTEN_ON)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	defer l.Close()
+	logger.Print("Service started")
+
+	// wait for connections
+	for {
+		conn, err := l.Accept()
+		if err != nil {
+			logger.Print(err)
+		}
+		logger.Printf("connect from %v", conn.RemoteAddr())
+		go srv.ServeConn(conn)
+	}
 }
