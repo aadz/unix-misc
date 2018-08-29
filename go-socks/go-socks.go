@@ -14,8 +14,11 @@ import (
 	"github.com/armon/go-socks5"
 )
 
+// Configuration defaults
 const (
+	AUTH_FILE        = "/etc/go-socks/auth"
 	LISTEN_ON        = "0.0.0.0:25002"
+	LOG_FILE         = "/var/log/go-socks.log"
 	PASSWORD_MIN_LEN = 8
 )
 
@@ -30,9 +33,8 @@ var (
 )
 
 func init() {
-	// auth file in form user:password, one pair per a line , comments by "#"
-	flag.StringVar(&authFile, "a", "/etc/go-socks/auth", "specify users' auth file")
-	flag.StringVar(&logFile, "l", "/var/log/go-socks.log", "specify log file, \"-\" for STDERR")
+	flag.StringVar(&authFile, "a", AUTH_FILE, "specify users' auth file")
+	flag.StringVar(&logFile, "l", LOG_FILE, "specify log file, \"-\" for STDERR")
 	flag.Parse()
 
 	// open log
@@ -45,7 +47,7 @@ func init() {
 			logF = os.Stderr // just use STDERR
 		}
 	}
-	logger = log.New(logF, "go-socks5 ", log.LstdFlags)
+	logger = log.New(logF, "go-socks ", log.LstdFlags)
 }
 
 func main() {
@@ -81,6 +83,7 @@ func main() {
 	}
 }
 
+// Read auth file in form user:password, one pair per a line , comments by "#"
 func readAuthFile() error {
 	fStr, err := ioutil.ReadFile(authFile)
 	if err != nil {
