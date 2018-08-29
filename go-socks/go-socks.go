@@ -30,9 +30,10 @@ var ( // global vars
 
 func main() {
 	// Get command line params
-	var authFile, logFile string
+	var authFile, logFile, listenOn string
 	flag.StringVar(&authFile, "a", AUTH_FILE, "specify users' auth file")
 	flag.StringVar(&logFile, "l", LOG_FILE, "specify log file, \"-\" for STDERR")
+	flag.StringVar(&listenOn, "listen", LISTEN_ON, "listen on")
 	flag.Parse()
 
 	// Open log
@@ -60,7 +61,7 @@ func main() {
 		panic(err)
 	}
 
-	startServer(server)
+	startServer(server, listenOn)
 }
 
 // Read auth file in form user:password, one pair per a line , comments by "#"
@@ -91,8 +92,8 @@ func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 	return authMap, nil
 }
 
-func startServer(srv *socks5.Server) {
-	l, err := net.Listen("tcp", LISTEN_ON)
+func startServer(srv *socks5.Server, listenOn string) {
+	l, err := net.Listen("tcp", listenOn)
 	if err != nil {
 		logger.Fatalf("[ERROR] %s", err)
 	}
