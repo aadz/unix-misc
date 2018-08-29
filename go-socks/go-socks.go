@@ -74,12 +74,16 @@ func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 	authMap := make(socks5.StaticCredentials)
 
 	for i, l := range authList {
+		// skip empty lines and comments
 		line := strings.Trim(l, " \r\t")
-		if len(line) == 0 || line[0] == '#' { // skip empty lines and comments
+		if len(line) == 0 || line[0] == '#' {
 			continue
 		}
 
-		up := strings.SplitN(line, ":", 2) // split user:password on the line
+		// split user:password on the line
+		up := strings.SplitN(line, ":", 2)
+
+		// check the pair and add it to the auth store
 		if len(up) == 2 {
 			if len(up[0]) > 0 && len(up[1]) >= PASSWORD_MIN_LEN {
 				authMap[up[0]] = up[1]
