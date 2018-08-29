@@ -71,24 +71,31 @@ func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 		return nil, err
 	}
 	authList := strings.Split(string(fStr), "\n")
-
 	authMap := make(socks5.StaticCredentials)
-	for _, line := range authList {
-		l := strings.Trim(line, " \r\t")
-		if len(l) == 0 || l[0] == '#' { // skip comments
+
+	for i, l := range authList {
+		line := strings.Trim(l, " \r\t")
+		if len(line) == 0 || line[0] == '#' { // skip empty lines and comments
 			continue
 		}
-		up := strings.SplitN(l, ":", 2) // split user:password on the line
-		if len(up) == 2 && len(up[0]) > 0 && len(up[1]) >= PASSWORD_MIN_LEN {
-			authMap[up[0]] = up[1]
-		} else if len(up[1]) < PASSWORD_MIN_LEN {
-			logger.Printf("[WARN] Incorrect password for %s, it must be %d symbols at least",
-				up[0], PASSWORD_MIN_LEN)
+
+		up := strings.SplitN(line, ":", 2) // split user:password on the line
+		if len(up) == 2 {
+			if len(up[0]) > 0 && len(up[1]) >= PASSWORD_MIN_LEN {
+				authMap[up[0]] = up[1]
+			} else if len(up[1]) < PASSWORD_MIN_LEN {
+				logger.Printf("[WARN] Incorrect password for %s, it must be %d symbols at least",
+					up[0], PASSWORD_MIN_LEN)
+			}
+		} else {
+			logger.Printf("[WARN] Incorrect auth file line %d: %s", i, line)
 		}
 	}
+
 	if len(authMap) == 0 {
 		return nil, fmt.Errorf("No user auth lines found in %s", authFile)
 	}
+
 	return authMap, nil
 }
 
@@ -103,11 +110,11 @@ func startServer(srv *socks5.Server, listenOn string) {
 	// wait for connections
 	for {
 		conn, err := l.Accept()
-		if err != nil {
-			logger.Printf("[ERROR] %s", err)
-		} else {
-			logger.Printf("[INFO] connect from %v", conn.RemoteAddr())
+		if err == nil {
+			logger.Printf("[INFO] connect from %s", conn.RemoteAddr())
 			go srv.ServeConn(conn)
+		} else {
+			logger.Printf("[ERROR] %s", err)
 		}
 	}
 }
