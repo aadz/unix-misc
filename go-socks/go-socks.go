@@ -50,7 +50,7 @@ func main() {
 	// Create a SOCKS5 server
 	var credStore socks5.CredentialStore
 	if credStore, err = readAuthFile(authFile); err != nil {
-		logger.Fatalf("Auth file read error: %s\n", err)
+		logger.Fatalf("[ERROR] Auth file read error: %s\n", err)
 	}
 	conf := &socks5.Config{}
 	conf.Logger = logger
@@ -81,7 +81,7 @@ func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 		if len(up) == 2 && len(up[0]) > 0 && len(up[1]) >= PASSWORD_MIN_LEN {
 			authMap[up[0]] = up[1]
 		} else if len(up[1]) < PASSWORD_MIN_LEN {
-			logger.Printf("Incorrect password for %s, it must be %d symbols at least",
+			logger.Printf("[WARN] Incorrect password for %s, it must be %d symbols at least",
 				up[0], PASSWORD_MIN_LEN)
 		}
 	}
@@ -94,10 +94,10 @@ func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 func startServer(srv *socks5.Server) {
 	l, err := net.Listen("tcp", LISTEN_ON)
 	if err != nil {
-		logger.Fatal(err)
+		logger.Fatalf("[ERROR] %s", err)
 	}
 	defer l.Close()
-	logger.Print("Service started")
+	logger.Print("[INFO] Service started")
 
 	// wait for connections
 	for {
@@ -105,7 +105,7 @@ func startServer(srv *socks5.Server) {
 		if err != nil {
 			logger.Print(err)
 		}
-		logger.Printf("connect from %v", conn.RemoteAddr())
+		logger.Printf("[INFO] connect from %v", conn.RemoteAddr())
 		go srv.ServeConn(conn)
 	}
 }
