@@ -64,7 +64,8 @@ func main() {
 	startServer(server, listenOn)
 }
 
-// Read auth file in form user:password, one pair per a line , comments by "#"
+// Read auth file in form of "user:password", one pair per a line,
+// with comments by beginning "#"
 func readAuthFile(authFile string) (socks5.CredentialStore, error) {
 	fStr, err := ioutil.ReadFile(authFile)
 	if err != nil {
