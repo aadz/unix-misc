@@ -198,7 +198,7 @@ func showPemFile() {
 	for i, _ := range crtArr {
 		cert, err := x509.ParseCertificate(crtArr[i].Bytes)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "failed to parse certificate: %s\n", err.Error())
+			fmt.Fprintf(os.Stderr, "failed to parse certificate: %s\n", err)
 		}
 		showCrtInfo(cert)
 		if i+1 < len(crtArr) {
