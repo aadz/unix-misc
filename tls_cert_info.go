@@ -21,7 +21,7 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.1"
+	VERSION   = "0.9.2"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
 	cfgPort             uint
 	hostStr, portStr    string
 	PKeyPKCS            [4]string  = [4]string{"Unknown", "RSA", "DSA", "ECDSA"}
-	SignPKCS            [13]string = [13]string{
+	arrSignPKCS         [13]string = [13]string{
 		"Unknown",
 		"MD2 With RSA",
 		"MD5 With RSA",
@@ -45,6 +45,22 @@ var (
 		"ECDSA With SHA256",
 		"ECDSA With SHA384",
 		"ECDSA With SHA512",
+	}
+	arrExtKeyUsage = [14]string{
+		"Any",
+		"ServerAuth",
+		"ClientAuth",
+		"CodeSigning",
+		"EmailProtection",
+		"IPSECEndSystem",
+		"IPSECTunnel",
+		"IPSECUser",
+		"TimeStamping",
+		"OCSPSigning",
+		"MicrosoftServerGatedCrypto",
+		"NetscapeServerGatedCrypto",
+		"MicrosoftCommercialCodeSigning",
+		"MicrosoftKernelCodeSigning",
 	}
 )
 
@@ -155,6 +171,11 @@ func showCrtInfo(crt *x509.Certificate) {
 	}
 	expireStr = fmt.Sprintf("%v %v", days_left, expireStr)
 
+	usageStr := usageString(crt)
+	if len(usageStr) > 0 {
+		usageStr = fmt.Sprintf("Usage:\t\t%s\n", usageStr)
+	}
+
 	sha1Fingerprint := sha1.Sum(crt.Raw)
 	sha256Fingerprint := sha256.Sum256(crt.Raw)
 	sha256TbsFingerprint := sha256.Sum256(crt.RawSubjectPublicKeyInfo)
@@ -165,14 +186,14 @@ func showCrtInfo(crt *x509.Certificate) {
 	infoStr += "PubKey:\t\t%v Encryption\n"
 	infoStr += "CrtSign:\t%v Encryption\n"
 	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v\n"
-	infoStr += "Subject:\t%v\nDNSNames:\t%v\n"
+	infoStr += "Subject:\t%v\nDNSNames:\t%v\n%s"
 	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\nSPKI:\t\t%v\n"
 	fmt.Printf(infoStr, crt.Issuer.CommonName, crt.Version,
 		crt.SerialNumber,
 		PKeyPKCS[crt.PublicKeyAlgorithm],
-		SignPKCS[crt.SignatureAlgorithm],
+		arrSignPKCS[crt.SignatureAlgorithm],
 		crt.NotBefore, crt.NotAfter, expireStr,
-		crt.Subject.String(), crt.DNSNames,
+		crt.Subject.String(), crt.DNSNames, usageStr,
 		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
 }
 
@@ -239,4 +260,46 @@ func showSiteCert() {
 		fmt.Fprintf(os.Stderr, "Connected to %s\n", serverStr)
 	}
 	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
+}
+
+func usageString(cert *x509.Certificate) string {
+	ku := cert.KeyUsage
+	res := make([]string, 0)
+
+	if ku&x509.KeyUsageDigitalSignature != 0 {
+		res = append(res, "DigitalSignature")
+	}
+	if ku&x509.KeyUsageContentCommitment != 0 {
+		res = append(res, "ContentCommitment")
+	}
+	if ku&x509.KeyUsageKeyEncipherment != 0 {
+		res = append(res, "KeyEncipherment")
+	}
+	if ku&x509.KeyUsageDataEncipherment != 0 {
+		res = append(res, "DataEncipherment")
+	}
+	if ku&x509.KeyUsageKeyAgreement != 0 {
+		res = append(res, "KeyAgreement")
+	}
+	if ku&x509.KeyUsageCertSign != 0 {
+		res = append(res, "CertSign")
+	}
+	if ku&x509.KeyUsageCRLSign != 0 {
+		res = append(res, "CRLSign")
+	}
+	if ku&x509.KeyUsageEncipherOnly != 0 {
+		res = append(res, "CRLSign")
+	}
+	if ku&x509.KeyUsageDecipherOnly != 0 {
+		res = append(res, "DecipherOnly")
+	}
+
+	if len(cert.ExtKeyUsage) > 0 {
+		for _, ext := range cert.ExtKeyUsage {
+			res = append(res, fmt.Sprintf("Ext%s", arrExtKeyUsage[ext]))
+		}
+
+	}
+
+	return strings.Join(res, " ")
 }
