@@ -263,9 +263,9 @@ func showSiteCert() {
 }
 
 func usageString(cert *x509.Certificate) string {
-	ku := cert.KeyUsage
 	res := make([]string, 0)
 
+	ku := cert.KeyUsage
 	if ku&x509.KeyUsageDigitalSignature != 0 {
 		res = append(res, "DigitalSignature")
 	}
