@@ -56,7 +56,7 @@ SPKI:           xmvvalwaPni4IBbhPzFPPMX6JbHlKqua257FmJsWWto=
 
 ### Install on Linux (64-bit)
 
-```bas
+```bash
 wget https://github.com/aadz/unix-misc/blob/master/packages/tls_cert_info-LinuxAMD64?raw=true \
   -O /usr/local/bin/tls_cert_info
 chmod 0755 /usr/local/bin/tls_cert_info
