@@ -35,7 +35,7 @@ help as usual.
 
 Example of run:
 ```text
-$ tls_cert_info example.com
+$ tls_cert_info -v example.com
 Connected to example.com:443
 *** Certificate info:
 IssuerCN:       DigiCert SHA2 High Assurance Server CA
@@ -60,5 +60,5 @@ SPKI:           xmvvalwaPni4IBbhPzFPPMX6JbHlKqua257FmJsWWto=
 hhttps://github.com/aadz/unix-misc/blob/master/packages/tls_cert_info-LinuxAMD64?raw=true \
   -O /usr/local/bin/tls_cert_info
  chmod 0755 /usr/local/bin/tls_cert_info
- ```
+```
 

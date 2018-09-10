@@ -21,15 +21,16 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.2"
+	VERSION   = "0.9.3"
 )
 
 var (
 	cfgPemFile          string
-	cfgValidityDaysOnly bool
 	cfgHost             string
-	cfgPort             uint
 	hostStr, portStr    string
+	cfgPort             uint
+	cfgValidityDaysOnly bool
+	cfgVerbose          bool
 	PKeyPKCS            [4]string  = [4]string{"Unknown", "RSA", "DSA", "ECDSA"}
 	arrSignPKCS         [13]string = [13]string{
 		"Unknown",
@@ -65,12 +66,12 @@ var (
 )
 
 func init() {
-	usageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\t%v -f <filename>\n\n"
-	usageStr += "<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed\n"
-	usageStr += "by square brackets.\n\nCommand line parameters:\n"
+	crtUsageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\t%v -f <filename>\n\n"
+	crtUsageStr += "<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed\n"
+	crtUsageStr += "by square brackets.\n\nCommand line parameters:\n"
 
 	flag.Usage = func() {
-		fmt.Fprintf(os.Stderr, usageStr, PROG_NAME, PROG_NAME, PROG_NAME)
+		fmt.Fprintf(os.Stderr, crtUsageStr, PROG_NAME, PROG_NAME, PROG_NAME)
 		flag.PrintDefaults()
 		fmt.Fprintf(os.Stderr, "  -h\tShow this help page.\n")
 	}
@@ -102,11 +103,12 @@ func byteSlice2Str(sl []byte) string {
 }
 
 func commandLineGet() {
-	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only.")
-	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates.")
-	flag.StringVar(&cfgHost, "H", "", "DNS host name or IP address.")
-	flag.UintVar(&cfgPort, "P", 443, "Port.")
-	flagVersion := flag.Bool("v", false, "Print version information and exit.")
+	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only")
+	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates")
+	flag.StringVar(&cfgHost, "H", "", "Host")
+	flag.UintVar(&cfgPort, "P", 443, "Port")
+	flag.BoolVar(&cfgVerbose, "v", false, "Print version information and exit")
+	flagVersion := flag.Bool("V", false, "Be verbose")
 	flag.Parse()
 
 	if *flagVersion {
@@ -150,10 +152,9 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 // Show server's certificate info
 func showCrtInfo(crt *x509.Certificate) {
 	days_left := int(crt.NotAfter.Sub(time.Now()).Seconds() / 86400)
-
-	if cfgValidityDaysOnly && len(cfgPemFile) == 0 {
+	if cfgValidityDaysOnly {
 		fmt.Println(days_left)
-		os.Exit(0)
+		return
 	}
 
 	// create certificate expiration info string
@@ -171,30 +172,31 @@ func showCrtInfo(crt *x509.Certificate) {
 	}
 	expireStr = fmt.Sprintf("%v %v", days_left, expireStr)
 
-	usageStr := usageString(crt)
-	if len(usageStr) > 0 {
-		usageStr = fmt.Sprintf("Usage:\t\t%s\n", usageStr)
+	infoStr := fmt.Sprintf("*** Certificate info:\nIssuerCN:\t%v\n", crt.Issuer.CommonName)
+	if cfgVerbose {
+		infoStr += fmt.Sprintf("Version:\t%v\n", crt.Version)
+		infoStr += fmt.Sprintf("SerialNum:\t%x\n", crt.SerialNumber)
+		infoStr += fmt.Sprintf("PubKey:\t\t%v Encryption\n", PKeyPKCS[crt.PublicKeyAlgorithm])
+		infoStr += fmt.Sprintf("CrtSign:\t%v Encryption\n", arrSignPKCS[crt.SignatureAlgorithm])
 	}
+	infoStr += fmt.Sprintf("NotBefore:\t%v\nNotAfter:\t%v - %s\n", crt.NotBefore, crt.NotAfter, expireStr)
+	infoStr += fmt.Sprintf("Subject:\t%s\nDNSNames:\t%s\n",
+		crt.Subject.String(), strings.Join(crt.DNSNames, " "))
+	if cfgVerbose {
+		crtUsageStr := crtUsageString(crt)
+		if len(crtUsageStr) > 0 {
+			crtUsageStr = fmt.Sprintf("Usage:\t\t%s\n", crtUsageStr)
+			infoStr += crtUsageStr
+		}
 
-	sha1Fingerprint := sha1.Sum(crt.Raw)
-	sha256Fingerprint := sha256.Sum256(crt.Raw)
-	sha256TbsFingerprint := sha256.Sum256(crt.RawSubjectPublicKeyInfo)
-	spki := base64.StdEncoding.EncodeToString(sha256TbsFingerprint[:])
-
-	infoStr := "*** Certificate info:\nIssuerCN:\t%v\nVersion:\t%v\n"
-	infoStr += "SerialNum:\t%x\n"
-	infoStr += "PubKey:\t\t%v Encryption\n"
-	infoStr += "CrtSign:\t%v Encryption\n"
-	infoStr += "NotBefore:\t%v\nNotAfter:\t%v - %v\n"
-	infoStr += "Subject:\t%v\nDNSNames:\t%v\n%s"
-	infoStr += "*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\nSPKI:\t\t%v\n"
-	fmt.Printf(infoStr, crt.Issuer.CommonName, crt.Version,
-		crt.SerialNumber,
-		PKeyPKCS[crt.PublicKeyAlgorithm],
-		arrSignPKCS[crt.SignatureAlgorithm],
-		crt.NotBefore, crt.NotAfter, expireStr,
-		crt.Subject.String(), crt.DNSNames, usageStr,
-		byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
+		sha1Fingerprint := sha1.Sum(crt.Raw)
+		sha256Fingerprint := sha256.Sum256(crt.Raw)
+		sha256TbsFingerprint := sha256.Sum256(crt.RawSubjectPublicKeyInfo)
+		spki := base64.StdEncoding.EncodeToString(sha256TbsFingerprint[:])
+		infoStr += fmt.Sprintf("*** Fingerprints:\nsha1:\t\t%v\nsha256:\t\t%v\nSPKI:\t\t%v\n",
+			byteSlice2Str(sha1Fingerprint[:]), byteSlice2Str(sha256Fingerprint[:]), spki)
+	}
+	fmt.Printf(infoStr)
 }
 
 func showPemFile() {
@@ -222,6 +224,13 @@ func showPemFile() {
 			fmt.Fprintf(os.Stderr, "failed to parse certificate: %s\n", err)
 		}
 		showCrtInfo(cert)
+
+		// In days only mode show days
+		// for the first certificate of the PEM file
+		if cfgValidityDaysOnly {
+			return
+		}
+
 		if i+1 < len(crtArr) {
 			fmt.Println("--")
 		}
@@ -262,8 +271,8 @@ func showSiteCert() {
 	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
 }
 
-func usageString(cert *x509.Certificate) string {
-	res := make([]string, 0)
+func crtUsageString(cert *x509.Certificate) string {
+	res := make([]string, 0, 4)
 
 	ku := cert.KeyUsage
 	if ku&x509.KeyUsageDigitalSignature != 0 {
