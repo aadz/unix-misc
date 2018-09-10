@@ -107,8 +107,8 @@ func commandLineGet() {
 	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates")
 	flag.StringVar(&cfgHost, "H", "", "Host")
 	flag.UintVar(&cfgPort, "P", 443, "Port")
-	flag.BoolVar(&cfgVerbose, "v", false, "Print version information and exit")
-	flagVersion := flag.Bool("V", false, "Be verbose")
+	flag.BoolVar(&cfgVerbose, "v", false, "Verbose")
+	flagVersion := flag.Bool("V", false, "Print version information and exit")
 	flag.Parse()
 
 	if *flagVersion {
