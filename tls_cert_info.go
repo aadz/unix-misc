@@ -265,7 +265,7 @@ func showSiteCert() {
 	}
 	defer conn.Close()
 
-	if !cfgValidityDaysOnly {
+	if !cfgValidityDaysOnly && cfgVerbose {
 		fmt.Fprintf(os.Stderr, "Connected to %s\n", serverStr)
 	}
 	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
