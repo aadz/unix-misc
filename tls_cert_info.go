@@ -10,6 +10,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"runtime"
 	"strconv"
@@ -21,13 +22,14 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.3"
+	VERSION   = "0.9.4"
 )
 
 var (
 	cfgPemFile          string
 	cfgHost             string
 	hostStr, portStr    string
+	cfgConnTimeout      uint
 	cfgPort             uint
 	cfgValidityDaysOnly bool
 	cfgVerbose          bool
@@ -107,6 +109,7 @@ func commandLineGet() {
 	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates")
 	flag.StringVar(&cfgHost, "H", "", "Host")
 	flag.UintVar(&cfgPort, "P", 443, "Port")
+	flag.UintVar(&cfgConnTimeout, "t", 10, "Connect timeout, seconds")
 	flag.BoolVar(&cfgVerbose, "v", false, "Verbose")
 	flagVersion := flag.Bool("V", false, "Print version information and exit")
 	flag.Parse()
@@ -250,10 +253,13 @@ func showSiteCert() {
 		portStr = strconv.Itoa(int(cfgPort))
 	}
 
+	dialer := new(net.Dialer)
+	dialer.Timeout = time.Duration(cfgConnTimeout) * time.Second
 	// Connect to server
 	serverStr := hostStr + ":" + portStr
 	tlsCfg := tls.Config{InsecureSkipVerify: true}
-	conn, err := tls.Dial("tcp", serverStr, &tlsCfg)
+	//conn, err := tls.Dial("tcp", serverStr, &tlsCfg)
+	conn, err := tls.DialWithDialer(dialer, "tcp", serverStr, &tlsCfg)
 	if err != nil && strings.Contains(err.Error(), "too many colons in address") {
 		// try to add '[]' for IPv6 and set default port
 		serverStr = "[" + os.Args[len(os.Args)-1] + "]:443"
