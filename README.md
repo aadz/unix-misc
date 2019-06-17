@@ -8,6 +8,32 @@
 ## go-socks
 A simple SOCKS5 server written in Go.
 
+## rusage.go
+Resoure usage informatioin dump. See `man 2 getrusage` for field description.
+
+```
+# rusage /bin/date
+Mon Jun 17 06:11:46 MSK 2019
+
+Utime:                  0.000
+Stime:                  0.000
+Rtime:                  0.002
+Maxrss:                  1932
+Ixrss:                      0
+Idrss:                      0
+Isrss:                      0                                                                                                                                                                                            
+Minflt:                    62                                                                                                                                                                                            
+Majflt:                     0
+Nswap:                      0
+Inblock:                    0
+Oublock:                    0
+Msgsnd:                     0
+Msgrcv:                     0
+Nsignals:                   0
+Nvcsw:                      1
+Nivcsw:                     1
+```
+
 ## shasum.go<a name="shasum"></a>
 Read Stdin and compute SHA1|SHA256|SHA384|SHA512 digest of it.
 
