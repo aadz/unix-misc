@@ -21,8 +21,8 @@ Rtime:                  0.002
 Maxrss:                  1932
 Ixrss:                      0
 Idrss:                      0
-Isrss:                      0                                                                                                                                                                                            
-Minflt:                    62                                                                                                                                                                                            
+Isrss:                      0
+Minflt:                    62
 Majflt:                     0
 Nswap:                      0
 Inblock:                    0
