@@ -9,7 +9,7 @@
 A simple SOCKS5 server written in Go.
 
 ## rusage.go
-Resoure usage informatioin dump. See `man 2 getrusage` for field description.
+Resoure usage informatioin dump. See `man 2 getrusage` for fields description.
 
 ```
 # rusage /bin/date
