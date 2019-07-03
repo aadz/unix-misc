@@ -11,40 +11,97 @@
 	v. 1.2 - 2019-06-10
 		display information about abnormal termination of a testing executalbe
 
+	v. 1.3 - 2019-06-11
+		some refactoring
+
+	v. 1.4 - 2019-07-03
+		statistics explanation added (from man 2 getrusage)
 */
+
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"syscall"
 	"time"
 )
 
-const (
-	VERSION = "1.1"
-)
+const STAT_EXPLANATION = `The fields are interpreted as follows:
 
+Utime
+    This is the total amount of time spent executing in user mode, expressed
+    in a timeval structure (seconds plus microseconds).
+
+Stime
+    This is the total amount of time spent executing in kernel mode,
+    expressed in a timeval structure (seconds plus microseconds).
+
+Rtime
+    Real time of execution.
+
+Maxrss (since Linux 2.6.32)
+    This is the maximum resident set size used (in kilobytes).
+    For RUSAGE_CHILDREN, this is the resident set size of the largest child,
+    not the maximum resident set size of the process tree.
+
+Ixrss (unmaintained)
+    This field is currently unused on Linux.
+
+Idrss (unmaintained)
+    This field is currently unused on Linux.
+
+Isrss (unmaintained)
+    This field is currently unused on Linux.
+
+Minflt
+    The number of page faults serviced without any I/O activity; here
+    I/O activity is avoided by “reclaiming” a page frame from the list of pages
+    awaiting reallocation.
+
+Majflt
+    The number of page faults serviced that required I/O activity.
+
+Nswap (unmaintained)
+    This field is currently unused on Linux.
+
+Inblock (since Linux 2.6.22)
+    The number of times the filesystem had to perform input.
+
+Oublock (since Linux 2.6.22)
+    The number of times the filesystem had to perform output.
+
+Msgsnd (unmaintained)
+    This field is currently unused on Linux.
+
+Msgrcv (unmaintained)
+    This field is currently unused on Linux.
+
+Nsignals (unmaintained)
+    This field is currently unused on Linux.
+
+Nvcsw (since Linux 2.6)
+    The number of times a context switch resulted due to a process voluntarily
+    giving up the processor before its time slice was completed (usually
+    to await availability of a resource).
+
+Nivcsw (since Linux 2.6)
+    The number of times a context switch resulted due to a higher priority
+    process becoming runnable or because the current process exceeded its time
+    slice.`
+
+func init() {
+	Hflag := flag.Bool("H", false, "Show explanation of ececution stat psrameters")
+	flag.Parse()
+	if *Hflag {
+		fmt.Println(STAT_EXPLANATION)
+		os.Exit(0)
+	}
+}
+
+// printRusage formats and prints a testing executable run stats.
 func printRusage(procState *os.ProcessState, rtime time.Duration) {
-	// &syscall.Rusage{
-	//	Utime:syscall.Timeval{Sec:1, Usec:288000},
-	//	Stime:syscall.Timeval{Sec:1, Usec:508000},
-	//	Maxrss:5008,
-	//	Ixrss:0,
-	//	Idrss:0,
-	//	Isrss:0,
-	//	Minflt:686,
-	//	Majflt:0,
-	//	Nswap:0,
-	//	Inblock:0,
-	//	Oublock:0,
-	//	Msgsnd:0,
-	//	Msgrcv:0,
-	//	Nsignals:0,
-	//	Nvcsw:1,
-	//	Nivcsw:344
-	// } see man 2 getrusage for explanation
-
 	sysRu := procState.SysUsage()
 	sysRusage := sysRu.(*syscall.Rusage)
 
@@ -87,8 +144,9 @@ func main() {
 		os.Exit(1)
 	}
 	endTime := time.Now()
-	printRusage(procState, endTime.Sub(startTime))
 
+	// show the execution results and usage of system resources
+	printRusage(procState, endTime.Sub(startTime))
 	exitCode := procState.ExitCode()
 	if exitCode != 0 { // abnormal termination
 		waitStatus := procState.Sys().(syscall.WaitStatus)
