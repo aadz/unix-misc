@@ -22,7 +22,7 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.4"
+	VERSION   = "0.9.5"
 )
 
 var (
@@ -34,7 +34,7 @@ var (
 	cfgValidityDaysOnly bool
 	cfgVerbose          bool
 	PKeyPKCS            [4]string  = [4]string{"Unknown", "RSA", "DSA", "ECDSA"}
-	arrSignPKCS         [13]string = [13]string{
+	arrSignPKCS         [17]string = [17]string{
 		"Unknown",
 		"MD2 With RSA",
 		"MD5 With RSA",
@@ -48,6 +48,10 @@ var (
 		"ECDSA With SHA256",
 		"ECDSA With SHA384",
 		"ECDSA With SHA512",
+		"SHA256 With RSAPSS",
+		"SHA384 With RSAPSS",
+		"SHA512 With RSAPSS",
+		"Pure Ed25519",
 	}
 	arrExtKeyUsage = [14]string{
 		"Any",
@@ -272,7 +276,7 @@ func showSiteCert() {
 	defer conn.Close()
 
 	if !cfgValidityDaysOnly && cfgVerbose {
-		fmt.Fprintf(os.Stderr, "Connected to %s\n", serverStr)
+		fmt.Printf("*** Connected to %s\n", serverStr)
 	}
 	showCrtInfo(conn.ConnectionState().PeerCertificates[0])
 }
