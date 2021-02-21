@@ -22,7 +22,7 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.5"
+	VERSION   = "0.9.6"
 )
 
 var (
@@ -32,6 +32,7 @@ var (
 	cfgConnTimeout      uint
 	cfgPort             uint
 	cfgValidityDaysOnly bool
+	cfgDomainsOnly      bool
 	cfgVerbose          bool
 	PKeyPKCS            [4]string  = [4]string{"Unknown", "RSA", "DSA", "ECDSA"}
 	arrSignPKCS         [17]string = [17]string{
@@ -110,6 +111,7 @@ func byteSlice2Str(sl []byte) string {
 
 func commandLineGet() {
 	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only")
+	flag.BoolVar(&cfgDomainsOnly, "D", false, "Print the certificate's domains only")
 	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates")
 	flag.StringVar(&cfgHost, "H", "", "Host")
 	flag.UintVar(&cfgPort, "P", 443, "Port")
@@ -161,6 +163,11 @@ func showCrtInfo(crt *x509.Certificate) {
 	days_left := int(crt.NotAfter.Sub(time.Now()).Seconds() / 86400)
 	if cfgValidityDaysOnly {
 		fmt.Println(days_left)
+		return
+	}
+
+	if cfgDomainsOnly {
+		fmt.Println(strings.Join(crt.DNSNames, " "))
 		return
 	}
 
