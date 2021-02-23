@@ -22,7 +22,7 @@ import (
 
 const (
 	PROG_NAME = "tls_cert_info"
-	VERSION   = "0.9.6"
+	VERSION   = "0.9.7"
 )
 
 var (
@@ -33,6 +33,7 @@ var (
 	cfgPort             uint
 	cfgValidityDaysOnly bool
 	cfgDomainsOnly      bool
+	cfgSerialOnly       bool
 	cfgVerbose          bool
 	PKeyPKCS            [4]string  = [4]string{"Unknown", "RSA", "DSA", "ECDSA"}
 	arrSignPKCS         [17]string = [17]string{
@@ -73,7 +74,7 @@ var (
 )
 
 func init() {
-	crtUsageStr := "Usage:\t%v [-d] <HOST>[:<PORT>]\n\t%v [-d] -H <HOST> [-P <PORT>]\n\t%v -f <filename>\n\n"
+	crtUsageStr := "Usage:\t%v <HOST>[:<PORT>]\n\t%v -H <HOST> [-P <PORT>]\n\t%v -f <filename>\n\n"
 	crtUsageStr += "<HOST> might be a DNS name or an IP address. IPv6 address should be enclosed\n"
 	crtUsageStr += "by square brackets.\n\nCommand line parameters:\n"
 
@@ -112,11 +113,12 @@ func byteSlice2Str(sl []byte) string {
 func commandLineGet() {
 	flag.BoolVar(&cfgValidityDaysOnly, "d", false, "Print remaining validity days count only")
 	flag.BoolVar(&cfgDomainsOnly, "D", false, "Print the certificate's domains only")
-	flag.StringVar(&cfgPemFile, "f", "", "File containing PEM encoded certificates")
+	flag.StringVar(&cfgPemFile, "f", "", "Read a file containing PEM encoded certificates")
 	flag.StringVar(&cfgHost, "H", "", "Host")
 	flag.UintVar(&cfgPort, "P", 443, "Port")
+	flag.BoolVar(&cfgSerialOnly, "S", false, "Print the certificate's serial number only")
 	flag.UintVar(&cfgConnTimeout, "t", 10, "Connect timeout, seconds")
-	flag.BoolVar(&cfgVerbose, "v", false, "Verbose")
+	flag.BoolVar(&cfgVerbose, "v", false, "Be more verbose")
 	flagVersion := flag.Bool("V", false, "Print version information and exit")
 	flag.Parse()
 
@@ -161,13 +163,18 @@ func normalizeHostStr(hName string) (hStr, pStr string) {
 // Show server's certificate info
 func showCrtInfo(crt *x509.Certificate) {
 	days_left := int(crt.NotAfter.Sub(time.Now()).Seconds() / 86400)
-	if cfgValidityDaysOnly {
-		fmt.Println(days_left)
+	if cfgDomainsOnly {
+		fmt.Println(strings.Join(crt.DNSNames, " "))
 		return
 	}
 
-	if cfgDomainsOnly {
-		fmt.Println(strings.Join(crt.DNSNames, " "))
+	if cfgSerialOnly {
+		fmt.Println(crt.SerialNumber)
+		return
+	}
+
+	if cfgValidityDaysOnly {
+		fmt.Println(days_left)
 		return
 	}
 
