@@ -46,9 +46,9 @@ Usage of shasum:
         SHA384
   -512
         SHA512
-  -X    print hex nums in upper case
-  -c    as a colon delimited string
-  -s    as a space delimited string
+  -X    print in upper case
+  -c    print as a colon delimited string
+  -s    print as a space delimited string
 ```
                                       
 ## sslcert_enddate_check.sh<a name="sslcert-enddate-check"></a>
